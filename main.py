@@ -74,6 +74,27 @@ def EulerAprimorado(y0,t0,h,nPassos,funct):
 
 def RungeKutta(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
+    y0 = float(y0)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    y = []
+    t = []
+    y.append(y0)
+    t.append(t0)
+    yAt = y0
+    tAt = t0
+
+    for n in range(1, nPassos+1):
+        k1 = sfunct.subs([("y", yAt), ("t", tAt)])
+        k2 = sfunct.subs([("y", yAt + (0.5 * h * k1)), ("t", tAt + (0.5 * h))])
+        k3 = sfunct.subs([("y", yAt + (0.5 * h * k2)), ("t", tAt + (0.5 * h))])
+        k4 = sfunct.subs([("y", yAt + (h * k3)), ("t", tAt+h)])
+        yAt = yAt + (h * ((k1 + (2 * k2) + (2 * k3) + k4)/6))
+        tAt = tAt+h
+        y.append(yAt)
+        t.append(tAt)
+    return [y,t]
 
 def AdamBashforthLista(y,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
@@ -118,7 +139,21 @@ for l in lista:
     elif(args[0] == "adam_bashforth" ):
         AdamBashforthLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
     elif(args[0] == "runge_kutta"):
-        RungeKutta(args[1],args[2],args[3],args[4],args[5])
+        result = RungeKutta(args[1],args[2],args[3],args[4],args[5])
+        resulty = result[0]
+        resultt = result[1]
+        f.write("\nMetodo de Runge-Kutta\n")
+        f.write(f"y({args[1]})={args[2]}\n")
+        f.write(f"h={args[3]}\n")
+        for x in range(0,int(args[4])+1):
+            f.write(str(x)+" "+str(resulty[x])+"\n")
+
+        plt.title(str(cc)+": Metodo de Runge-Kutta")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.plot(resultt, resulty, 'go')
+        plt.plot(resultt, resulty, 'k:', color='blue')
+        plt.savefig(str(cc)+'.png')
     elif(args[0] == "euler_aprimorado"):
         result = EulerAprimorado(args[1],args[2],args[3],args[4],args[5])
         resulty = result[0]
