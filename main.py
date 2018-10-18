@@ -26,27 +26,23 @@ def Euler(y0,t0,h,nPassos,funct):
 
 def EulerInverso(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
-    # y0 = float(y0)
-    # t0 = float(t0)
-    # h = float(h)
-    # nPassos = int(nPassos)
-    # y = []
-    # t = []
-    # y.append(y0)
-    # t.append(t0)
-    # yAt = y0
-    # tAt = t0
-    #
-    # for n in range(1, nPassos+1):
-    #     tmp =+ yAt + h*sfunct.subs([("y", yAt), ("t", tAt)])
-    #     #fn = Eq(tmp, y)
-    #     yAt = solve(tmp,y)
-    #     tAt = tAt+h
-    #
-    #     y.append(yAt)
-    #     t.append(tAt)
-    #
-    # return
+    y0 = float(y0)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    y = []
+    t = []
+    y.append(y0)
+    t.append(t0)
+    yAt = y0
+    tAt = t0
+
+    for n in range(0, nPassos):
+        yAt = y[n] + h*sfunct.subs([("y", y[n]), ("t", t[n])])
+        tAt = (t[n]+h)
+        y.append(y[n] + h*sfunct.subs([("y", yAt), ("t", tAt)]))
+        t.append(tAt)
+    return [y,t]
 
 def EulerAprimorado(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
@@ -98,6 +94,46 @@ def RungeKutta(y0,t0,h,nPassos,funct):
 
 def AdamBashforthLista(y,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    ordem = int(ordem)
+    t = []
+    ysub = []
+    for n in y:
+        ysub.append(float(n))
+    y = ysub
+    ysub = []
+    t.append(t0)
+    tAt = t0
+    # for g in range(0,len(y)):
+    #     ysub.append(sfunct.subs([("y", y[g]), ("t", tAt)]))
+    #     tAt += tAt + h
+    # tAt = t0
+    # yfin = []
+    # for i in range (ordem-2 , nPassos-1):
+    #     #receives F calculated in created function
+    #
+    #     tAt = tAt + h
+    #
+    #
+    #     #enter values in graph
+    #     yfin.append(ysub[i] + calBashCof(h, i,ysub, ordem))
+    #     t.append(tAt)
+    #
+    # print(yfin)
+
+def calBashCof(h,i,lista,g):
+    if(g==2):
+        return (h/2)*(3*lista[i]-lista[i-1])
+    elif(g==3):
+        return ((h/12)*(23*lista[i-0]-16*lista[i-1]+5*lista[i-3]))
+    elif(g==4):
+        return ((h/24)*(55*lista[i-0]-59*lista[i-1]+37*lista[i-2]-9*lista[i-3]))
+    elif(g==5):
+        return ((h/720)*(1901*lista[i-0]-2774*lista[i-1]+2616*lista[i-2]-1274*lista[i-3]+251*lista[i-4]))
+    elif(g==6):
+        return (h/1440)*(4277*lista[i-0]-7923*lista[i-1]+9982*lista[i-2]-7298*lista[i-3]+2877*lista[i-4]-475*lista[i-5])
 
 def AdamBashforthAnt(metodo,y0,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
@@ -148,6 +184,7 @@ for l in lista:
         for x in range(0,int(args[4])+1):
             f.write(str(x)+" "+str(resulty[x])+"\n")
 
+        plt.clf()
         plt.title(str(cc)+": Metodo de Runge-Kutta")
         plt.xlabel("t")
         plt.ylabel("y")
@@ -164,6 +201,7 @@ for l in lista:
         for x in range(0,int(args[4])+1):
             f.write(str(x)+" "+str(resulty[x])+"\n")
 
+        plt.clf()
         plt.title(str(cc)+": Metodo de Euler Aprimorado")
         plt.xlabel("t")
         plt.ylabel("y")
@@ -171,7 +209,22 @@ for l in lista:
         plt.plot(resultt, resulty, 'k:', color='blue')
         plt.savefig(str(cc)+'.png')
     elif(args[0] == "euler_inverso"):
-        EulerInverso(args[1],args[2],args[3],args[4],args[5])
+        result = EulerInverso(args[1],args[2],args[3],args[4],args[5])
+        resulty = result[0]
+        resultt = result[1]
+        f.write("\nMetodo de Euler Inverso\n")
+        f.write(f"y({args[1]})={args[2]}\n")
+        f.write(f"h={args[3]}\n")
+        for x in range(0,int(args[4])+1):
+            f.write(str(x)+" "+str(resulty[x])+"\n")
+
+        plt.clf()
+        plt.title(str(cc)+": Euler")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.plot(resultt, resulty, 'go')
+        plt.plot(resultt, resulty, 'k:', color='blue')
+        plt.savefig(str(cc)+'.png')
     elif(args[0] == "euler"):
         result = Euler(args[1],args[2],args[3],args[4],args[5])
         resulty = result[0]
@@ -182,6 +235,7 @@ for l in lista:
         for x in range(0,int(args[4])+1):
             f.write(str(x)+" "+str(resulty[x])+"\n")
 
+        plt.clf()
         plt.title(str(cc)+": Euler")
         plt.xlabel("t")
         plt.ylabel("y")
