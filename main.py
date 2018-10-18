@@ -17,7 +17,6 @@ def Euler(y0,t0,h,nPassos,funct):
     yAt = y0
     tAt = t0
     for n in range(1, nPassos+1):
-        #calcular valor do ponto atual values
         yAt += h*sfunct.subs([("y", yAt), ("t", tAt)])
         tAt += h
         y.append(yAt)
@@ -27,9 +26,51 @@ def Euler(y0,t0,h,nPassos,funct):
 
 def EulerInverso(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
+    # y0 = float(y0)
+    # t0 = float(t0)
+    # h = float(h)
+    # nPassos = int(nPassos)
+    # y = []
+    # t = []
+    # y.append(y0)
+    # t.append(t0)
+    # yAt = y0
+    # tAt = t0
+    #
+    # for n in range(1, nPassos+1):
+    #     tmp =+ yAt + h*sfunct.subs([("y", yAt), ("t", tAt)])
+    #     #fn = Eq(tmp, y)
+    #     yAt = solve(tmp,y)
+    #     tAt = tAt+h
+    #
+    #     y.append(yAt)
+    #     t.append(tAt)
+    #
+    # return
 
 def EulerAprimorado(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
+    y0 = float(y0)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    y = []
+    t = []
+    y.append(y0)
+    t.append(t0)
+    yAt = y0
+    tAt = t0
+
+    for n in range(1, nPassos+1):
+        Fn = sfunct.subs([("y", yAt), ("t", tAt)])
+        proxy = yAt+(h*Fn)
+        tAt += h
+        diff = (Fn + sfunct.subs([("y", proxy), ("t", tAt)]))/2
+        yAt += h*diff
+        y.append(yAt)
+        t.append(tAt)
+
+    return [y,t]
 
 def RungeKutta(y0,t0,h,nPassos,funct):
     sfunct = sympify(funct)
@@ -79,7 +120,21 @@ for l in lista:
     elif(args[0] == "runge_kutta"):
         RungeKutta(args[1],args[2],args[3],args[4],args[5])
     elif(args[0] == "euler_aprimorado"):
-        EulerAprimorado(args[1],args[2],args[3],args[4],args[5])
+        result = EulerAprimorado(args[1],args[2],args[3],args[4],args[5])
+        resulty = result[0]
+        resultt = result[1]
+        f.write("\nMetodo de Euler Aprimorado\n")
+        f.write(f"y({args[1]})={args[2]}\n")
+        f.write(f"h={args[3]}\n")
+        for x in range(0,int(args[4])+1):
+            f.write(str(x)+" "+str(resulty[x])+"\n")
+
+        plt.title(str(cc)+": Metodo de Euler Aprimorado")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.plot(resultt, resulty, 'go')
+        plt.plot(resultt, resulty, 'k:', color='blue')
+        plt.savefig(str(cc)+'.png')
     elif(args[0] == "euler_inverso"):
         EulerInverso(args[1],args[2],args[3],args[4],args[5])
     elif(args[0] == "euler"):
@@ -89,16 +144,14 @@ for l in lista:
         f.write("\nMetodo de Euler\n")
         f.write(f"y({args[1]})={args[2]}\n")
         f.write(f"h={args[3]}\n")
-        for x in range(0,int(args[4])):
+        for x in range(0,int(args[4])+1):
             f.write(str(x)+" "+str(resulty[x])+"\n")
 
-        plt.title("Euler Simples")
+        plt.title(str(cc)+": Euler")
         plt.xlabel("t")
         plt.ylabel("y")
         plt.plot(resultt, resulty, 'go')
         plt.plot(resultt, resulty, 'k:', color='blue')
-
-        #Show graph
         plt.savefig(str(cc)+'.png')
     else:
         continue
