@@ -1,7 +1,7 @@
 # Projeto-Metodos
 Projeto da cadeira Métodos Numéricos Computacionais (if816ec) do Centro de Informática (CIN) da Universidade Federal de Pernambuco
 
-##Instalando o projeto  
+## Instalando o projeto  
 Para rodar o projeto, recomendo criar um virtualenv, para que as bibliotecas instaladas não entrem em conflito com as que a sua máquina já venha a possuir.
 
 Para tal, é preciso primeiro saber se você já possui virtualenv instalada.
@@ -23,7 +23,7 @@ caso você també não tenha o python 3
 sudo apt install python3
 ````  
 
-##Rodando o projeto  
+## Rodando o projeto  
 Agora que temos tudo instalado, vamos criar o ambiente virtual para separar as biblioteca, como foi dito em cima. Para isto é preciso estar denntro do diretório do projeto, o mesmo que tem o arquivo 'metodos.py"
 ```shell
 virtualenv -p python3 venv
