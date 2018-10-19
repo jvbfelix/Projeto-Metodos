@@ -117,10 +117,6 @@ def AdamBashforthLista(y,t0,h,nPassos,funct,ordem):
         tsub.append(tAt)
         yfin.append(yAt)
         tfin.append(tAt)
-
-
-    for i in range(0,len(ysub)-1):
-        print(str(ysub[i])+" "+str(tsub[i]))
     return [yfin,tfin]
 
 def calBashCof(h,i,lista,g):
@@ -168,9 +164,77 @@ def AdamBashforthAnt(metodo,y0,t0,h,nPassos,funct,ordem):
 
 def AdamMultonLista(y,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    ordem = int(ordem)
+    t = []
+    ysub = []
+    for n in range(0,ordem-1):
+        ysub.append(float(y[n]))
+    y = ysub
+    tsub = []
+    yfin = []
+    tfin = []
+    tAt = t0
+    for g in range(0,ordem-1):
+        tsub.append(tAt)
+        tAt += tAt + g*h
+
+    yOri = y
+    tOri = tsub
+    for i in range (1, nPassos):
+        yAt = y[i] + calMultonCof(h,i,yOri,ordem)
+        tAt = tAt + h
+        yOri.append(yAt)
+        tOri.append(tAt)
+        yfin.append(yAt)
+        tfin.append(tAt)
+    return [yfin,tfin]
 
 def AdamMultonAnt(metodo,y0,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
+    if(metodo == "euler"):
+        result = Euler(y0,t0,h,nPassos,funct)
+    elif(metodo == "euler_inverso"):
+        result = EulerInverso(y0,t0,h,nPassos,funct)
+    elif(metodo == "euler_aprimorado"):
+        result = EulerAprimorado(y0,t0,h,nPassos,funct)
+    elif(metodo == "runge_kutta"):
+        result = RungeKutta(y0,t0,h,nPassos,funct)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    ordem = int(ordem)
+    yOri = result[0]
+    tOri = result[1]
+    ysub = []
+    tsub = []
+    tAt = tOri[0]
+
+    for i in range (0, nPassos):
+        yAt = yOri[i] + calMultonCof(h,i,yOri,ordem)
+        tAt = tAt + h
+        ysub.append(yAt)
+        tsub.append(tAt)
+
+    return [ysub,tsub]
+
+def calMultonCof(h,i,l,ordem):
+    if(ordem==2):
+        return (h/2)*(l[i-0]+l[i-1])
+    elif(ordem==3):
+        return ((h/12)*(5*l[i-0]+8*l[i-1]-l[i-2]))
+    elif(ordem==4):
+        return ((h/24)*(9*l[i-0]+19*l[i-1]-5*l[i-2]+l[i-3]))
+    elif(ordem==5):
+        return ((h/720)*(251*l[i-0]+646*l[i-1]-264*l[i-2]+106*l[i-3]-19*l[i-4]))
+    elif(ordem==6):
+        return (h/1440)*(475*l[i-0]+1427*l[i-1]-798*l[i-2]+482*l[i-3]-173*l[i-4]+27*l[i-5])
+    elif(ordem==7):
+        return (h)*((96/288)*l[i-0]+(1427/1440)*l[i-1]-(133/240)*l[i-2]+(241/720)*l[i-3]-(173/1440)*l[i-4]+(3/160)*l[i-5])
+    elif(ordem==8):
+        return (h)*((19087/60480)*l[i-0]+(2713/2520)*l[i-1]-(15487/20160)*l[i-2]+(586/945)*l[i-3]-(6737/20160)*l[i-4]+(263/2520)*l[i-5]-(863/60480)*l[i-i-6])
 
 def FormulaInversaLista(y,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
@@ -194,6 +258,21 @@ for l in lista:
             FormulaInversaAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
         elif(args[0][0] == "adam_multon" ):
             AdamMultonAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
+            resulty = result[0]
+            resultt = result[1]
+            f.write("\nMetodo de Adan-Multon por "+ args[0][1]+"\n")
+            f.write(f"y({args[1]})={args[2]}\n")
+            f.write(f"h={args[3]}\n")
+            for x in range(0,len(resulty)-1):
+                f.write(str(x)+" "+str(resulty[x])+"\n")
+
+            plt.clf()
+            plt.title(str(cc)+": Metodo Adan-Multon por "+ args[0][1])
+            plt.xlabel("t")
+            plt.ylabel("y")
+            plt.plot(resultt, resulty, 'go')
+            plt.plot(resultt, resulty, 'k:', color='blue')
+            plt.savefig(str(cc)+'.png')
         elif(args[0][0] == "adam_bashforth" ):
             result = AdamBashforthAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
             resulty = result[0]
@@ -214,7 +293,22 @@ for l in lista:
     elif(args[0] == "formula_inversa" ):
         FormulaInversaLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
     elif(args[0] == "adam_multon" ):
-        AdamMultonLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
+        result = AdamMultonLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
+        resulty = result[0]
+        resultt = result[1]
+        f.write("\nMetodo de Adan-Multon\n")
+        f.write(f"y({args[1]})={args[2]}\n")
+        f.write(f"h={args[3]}\n")
+        for x in range(0,len(resulty)-1):
+            f.write(str(x)+" "+str(resulty[x])+"\n")
+
+        plt.clf()
+        plt.title(str(cc)+": Metodo de Adan-Multon")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.plot(resultt, resulty, 'go')
+        plt.plot(resultt, resulty, 'k:', color='blue')
+        plt.savefig(str(cc)+'.png')
     elif(args[0] == "adam_bashforth" ):
         result = AdamBashforthLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
         resulty = result[0]
