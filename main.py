@@ -100,43 +100,71 @@ def AdamBashforthLista(y,t0,h,nPassos,funct,ordem):
     ordem = int(ordem)
     t = []
     ysub = []
-    for n in y:
-        ysub.append(float(n))
+    for n in range(0,ordem):
+        ysub.append(float(y[n]))
     y = ysub
-    ysub = []
-    t.append(t0)
+    tsub = []
+    yfin = []
+    tfin = []
     tAt = t0
-    # for g in range(0,len(y)):
-    #     ysub.append(sfunct.subs([("y", y[g]), ("t", tAt)]))
-    #     tAt += tAt + h
-    # tAt = t0
-    # yfin = []
-    # for i in range (ordem-2 , nPassos-1):
-    #     #receives F calculated in created function
-    #
-    #     tAt = tAt + h
-    #
-    #
-    #     #enter values in graph
-    #     yfin.append(ysub[i] + calBashCof(h, i,ysub, ordem))
-    #     t.append(tAt)
-    #
-    # print(yfin)
+    for g in range(0,ordem):
+        tsub.append(tAt)
+        tAt += tAt + g*h
+    for i in range (ordem-1 , nPassos+ordem):
+        yAt = ysub[i] + calBashCof(h,i,ysub,ordem)
+        tAt = tAt + h
+        ysub.append(yAt)
+        tsub.append(tAt)
+        yfin.append(yAt)
+        tfin.append(tAt)
+
+
+    for i in range(0,len(ysub)-1):
+        print(str(ysub[i])+" "+str(tsub[i]))
+    return [yfin,tfin]
 
 def calBashCof(h,i,lista,g):
     if(g==2):
         return (h/2)*(3*lista[i]-lista[i-1])
     elif(g==3):
-        return ((h/12)*(23*lista[i-0]-16*lista[i-1]+5*lista[i-3]))
+        return ((h/12)*(23*lista[i]-16*lista[i-1]+5*lista[i-2]))
     elif(g==4):
-        return ((h/24)*(55*lista[i-0]-59*lista[i-1]+37*lista[i-2]-9*lista[i-3]))
+        return ((h/24)*(55*lista[i]-59*lista[i-1]+37*lista[i-2]-9*lista[i-3]))
     elif(g==5):
-        return ((h/720)*(1901*lista[i-0]-2774*lista[i-1]+2616*lista[i-2]-1274*lista[i-3]+251*lista[i-4]))
+        return ((h/720)*(1901*lista[i]-2774*lista[i-1]+2616*lista[i-2]-1274*lista[i-3]+251*lista[i-4]))
     elif(g==6):
-        return (h/1440)*(4277*lista[i-0]-7923*lista[i-1]+9982*lista[i-2]-7298*lista[i-3]+2877*lista[i-4]-475*lista[i-5])
+        return (h/1440)*(4277*lista[i]-7923*lista[i-1]+9982*lista[i-2]-7298*lista[i-3]+2877*lista[i-4]-475*lista[i-5])
+    elif(g==7):
+        return h*((198721/60480)*lista[i]-(18637/2520)*lista[i-1]+(235183/20160)*lista[i-2]-(10754/945)*lista[i-3]+(135713/20160)*lista[i-4]-(5603/2520)*lista[i-5]+(19087/60480)*lista[i-6])
+    elif(g==8):
+        return h*((16083/4480)*lista[i]-(1152169/120960)*lista[i-1]+(242653/13440)*lista[i-2]-(296053/13440)*lista[i-3]+(2102243/120960)*lista[i-4]-(115747/13440)*lista[i-5]+(32863/13440)*lista[i-6]+(5257/17280)*lista[i-7])
 
 def AdamBashforthAnt(metodo,y0,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
+    if(metodo == "euler"):
+        result = Euler(y0,t0,h,nPassos,funct)
+    elif(metodo == "euler_inverso"):
+        result = EulerInverso(y0,t0,h,nPassos,funct)
+    elif(metodo == "euler_aprimorado"):
+        result = EulerAprimorado(y0,t0,h,nPassos,funct)
+    elif(metodo == "runge_kutta"):
+        result = RungeKutta(y0,t0,h,nPassos,funct)
+    t0 = float(t0)
+    h = float(h)
+    nPassos = int(nPassos)
+    ordem = int(ordem)
+    yOri = result[0]
+    tOri = result[1]
+    ysub = []
+    tsub = []
+    tAt = tOri[0]
+    for i in range (ordem-1 , len(yOri)):
+        yAt = yOri[i] + calBashCof(h,i,yOri,ordem)
+        tAt = tAt + h
+        ysub.append(yAt)
+        tsub.append(tAt)
+
+    return [ysub,tsub]
 
 def AdamMultonLista(y,t0,h,nPassos,funct,ordem):
     sfunct = sympify(funct)
@@ -167,13 +195,43 @@ for l in lista:
         elif(args[0][0] == "adam_multon" ):
             AdamMultonAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
         elif(args[0][0] == "adam_bashforth" ):
-            AdamBashforthAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
+            result = AdamBashforthAnt(args[0][1],args[1],args[2],args[3],args[4],args[5],args[6])
+            resulty = result[0]
+            resultt = result[1]
+            f.write("\nMetodo de Adan-Bashforth por "+ args[0][1]+"\n")
+            f.write(f"y({args[1]})={args[2]}\n")
+            f.write(f"h={args[3]}\n")
+            for x in range(0,len(resulty)-1):
+                f.write(str(x)+" "+str(resulty[x])+"\n")
+
+            plt.clf()
+            plt.title(str(cc)+": Metodo Adan-Bashforth por "+ args[0][1])
+            plt.xlabel("t")
+            plt.ylabel("y")
+            plt.plot(resultt, resulty, 'go')
+            plt.plot(resultt, resulty, 'k:', color='blue')
+            plt.savefig(str(cc)+'.png')
     elif(args[0] == "formula_inversa" ):
         FormulaInversaLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
     elif(args[0] == "adam_multon" ):
         AdamMultonLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
     elif(args[0] == "adam_bashforth" ):
-        AdamBashforthLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
+        result = AdamBashforthLista(args[1:(len(args)-5)],args[len(args)-5],args[len(args)-4],args[len(args)-3],args[len(args)-2],args[len(args)-1])
+        resulty = result[0]
+        resultt = result[1]
+        f.write("\nMetodo de Adan-Bashforth\n")
+        f.write(f"y({args[1]})={args[2]}\n")
+        f.write(f"h={args[3]}\n")
+        for x in range(0,len(resulty)-1):
+            f.write(str(x)+" "+str(resulty[x])+"\n")
+
+        plt.clf()
+        plt.title(str(cc)+": Metodo de Adan-Bashforth")
+        plt.xlabel("t")
+        plt.ylabel("y")
+        plt.plot(resultt, resulty, 'go')
+        plt.plot(resultt, resulty, 'k:', color='blue')
+        plt.savefig(str(cc)+'.png')
     elif(args[0] == "runge_kutta"):
         result = RungeKutta(args[1],args[2],args[3],args[4],args[5])
         resulty = result[0]
@@ -219,7 +277,7 @@ for l in lista:
             f.write(str(x)+" "+str(resulty[x])+"\n")
 
         plt.clf()
-        plt.title(str(cc)+": Euler")
+        plt.title(str(cc)+": Euler Inverso")
         plt.xlabel("t")
         plt.ylabel("y")
         plt.plot(resultt, resulty, 'go')
